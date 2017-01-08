@@ -121,7 +121,7 @@ defmodule Perudox.Game.StateTest do
     end
   end
 
-  describe "challenging" do
+  describe "dudoing" do
     setup do
       players = create_players 4
       state = State.start %State{players: players}
@@ -158,7 +158,7 @@ defmodule Perudox.Game.StateTest do
     end
   end
 
-  describe "checking" do
+  describe "calzoing" do
     setup do
       players = create_players 4
       state = State.start %State{players: players, history: [%Bet{count: 1, value: 2}]}

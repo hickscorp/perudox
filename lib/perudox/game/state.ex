@@ -12,13 +12,16 @@ defmodule Perudox.Game.State do
   @type mode :: :normal | :palifico
   @type players :: list(Player.t)
   @type t :: %State{
-    mode: mode, previous_player: Player.t, players: players, first_player: Player.t,
-    first_player_turn: boolean, phase: phase, history: list(Bet.t),
+    phase: phase, mode: mode,
+    previous_player: Player.t, players: players,
+    first_player: Player.t, first_player_turn: boolean,
+    history: list(Bet.t),
     dice_count: PlayerState.count, hand_counts: %{PlayerState.t => PlayerState.count}
   }
   defstruct [
-    mode: :normal, previous_player: nil, players: [], first_player: nil,
-    first_player_turn: true, phase: :open, history: [],
+    phase: :open, mode: :normal,
+    previous_player: nil, players: [],
+    first_player: nil, first_player_turn: true, history: [],
     dice_count: 0, hand_counts: %{}
   ]
 
@@ -83,6 +86,7 @@ defmodule Perudox.Game.State do
     looser |> Player.lose_a_dice
     state
       |> maintain_dice_counts
+      |> cycle_players_until(looser)
   end
 
   @spec calzo(State.t, Player.t) :: State.t | {:error, atom}
@@ -102,7 +106,8 @@ defmodule Perudox.Game.State do
     {:error, :invalid_turn}
   end
   def calzo(state, player) do
-    handle_calzo state, player, length Player.state(player).hand
+    state
+      |> handle_calzo player, length Player.state(player).hand
   end
 
   # Private functions.
@@ -128,6 +133,10 @@ defmodule Perudox.Game.State do
   def bet_exactly_fulfilled?(%{mode: mode, history: [lb | _]} = state) do
     lb.count == occurences_of mode, occurences(state), lb.value
   end
+
+  @spec cycle_players_until(State.t, Player.t) :: State.t
+  def cycle_players_until(%{players: [until | _]}, until), do: state
+  def cycle_players_until(state, until), do: cycle_players_until cycle_players(state), until
 
   @spec cycle_players(State.t) :: State.t
   defp cycle_players(%{players: players} = state) do
