@@ -107,7 +107,7 @@ defmodule Perudox.Game.State do
   end
   def calzo(state, player) do
     state
-      |> handle_calzo player, length Player.state(player).hand
+      |> handle_calzo(player, length(Player.state(player).hand))
   end
 
   # Private functions.
@@ -135,7 +135,7 @@ defmodule Perudox.Game.State do
   end
 
   @spec cycle_players_until(State.t, Player.t) :: State.t
-  def cycle_players_until(%{players: [until | _]}, until), do: state
+  def cycle_players_until(%{players: [until | _]} = state, until), do: state
   def cycle_players_until(state, until), do: cycle_players_until cycle_players(state), until
 
   @spec cycle_players(State.t) :: State.t

@@ -238,6 +238,13 @@ defmodule Perudox.Game.StateTest do
     # Cannot bet if game not started.
     ret = Game.bet game, gina, %{count: 1, value: 2}
     assert ret == {:error, :not_in_bets_phase}
+    # Getting things from the game.
+    %{players: players} = Game.state game
+    assert players == [gina, pierre, tooth, go]
+    assert Game.phase(game) == :open
+    assert Game.mode(game) == :normal
+    assert Game.history(game) == []
+    assert Game.players(game) == players
     # Start the game.
     ret = Game.start game
     assert ret == :ok

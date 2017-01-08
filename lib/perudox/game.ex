@@ -24,11 +24,11 @@ defmodule Perudox.Game do
   @spec state(Game.t) :: State.t
   def state(game), do: GenServer.call game, :state
 
-  @spec mode(Game.t) :: State.mode
-  def mode(game), do: state(game).mode
-
   @spec phase(Game.t) :: State.phase
   def phase(game), do: state(game).phase
+
+  @spec mode(Game.t) :: State.mode
+  def mode(game), do: state(game).mode
 
   @spec history(Game.t) :: list(Perudox.Bet.t)
   def history(game), do: state(game).history

@@ -13,9 +13,8 @@ defmodule Perudox.Player do
 
   @spec new(String.t) :: Player.t
   def new(nickname) do
-    with {:ok, player} <- start_link %State{nickname: nickname} do
-      player
-    end
+    {:ok, player} = start_link %State{nickname: nickname}
+    player
   end
 
   @spec start_link(State.t) :: {:ok, Player.t}

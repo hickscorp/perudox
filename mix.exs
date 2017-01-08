@@ -13,13 +13,22 @@ defmodule Perudox.Mixfile do
       start_permanent: Mix.env == :prod,
       deps: deps(),
       package: package(),
-      description: description()
+      description: description(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        "coveralls": :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ]
     ]
   end
 
   def application do
-    [applications: [:logger],
-     mod: {Perudox, []}]
+    [
+      applications: [:logger],
+      mod: {Perudox, []}
+    ]
   end
 
   defp deps do
@@ -30,7 +39,8 @@ defmodule Perudox.Mixfile do
       {:dialyxir, "~> 0.4", only: :dev, runtime: false},
 
       {:faker, github: "igas/faker", override: true, only: ~w(dev test)a},
-      {:blacksmith, "~> 0.1", only: ~w(dev test)a}
+      {:blacksmith, "~> 0.1", only: ~w(dev test)a},
+      {:excoveralls, "~> 0.5", only: ~w(dev test)a}
     ]
   end
 
