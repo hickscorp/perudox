@@ -31,6 +31,9 @@ defmodule Perudox.Player do
   @spec hand(Player.t) :: State.hand
   def hand(player), do: state(player).hand
 
+  @spec game_over?(Player.t) :: boolean
+  def game_over?(player), do: state(player).game_over
+
   @spec occurences(Player.t) :: State.occurences
   def occurences(player), do: GenServer.call player, :occurences
 
@@ -49,7 +52,9 @@ defmodule Perudox.Player do
   # GenServer callback.
 
   @spec init(State.t) :: {:ok, State.t}
-  def init(state), do: {:ok, state}
+  def init(state) do
+    {:ok, state}
+  end
 
   def handle_call(:state, _from, state) do
     {:reply, state, state}
