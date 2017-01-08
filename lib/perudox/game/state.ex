@@ -10,16 +10,17 @@ defmodule Perudox.Game.State do
 
   @type phase :: :open | :bets
   @type mode :: :normal | :palifico
+  @type turn :: pos_integer
   @type players :: list(Player.t)
   @type t :: %State{
-    phase: phase, mode: mode,
+    phase: phase, mode: mode, turn: turn,
     previous_player: Player.t, players: players,
     first_player: Player.t, first_player_turn: boolean,
     history: list(Bet.t),
     dice_count: PlayerState.count, hand_counts: %{PlayerState.t => PlayerState.count}
   }
   defstruct [
-    phase: :open, mode: :normal,
+    phase: :open, mode: :normal, turn: 1,
     previous_player: nil, players: [],
     first_player: nil, first_player_turn: true, history: [],
     dice_count: 0, hand_counts: %{}
@@ -86,6 +87,7 @@ defmodule Perudox.Game.State do
     looser |> Player.lose_a_dice
     state
       |> maintain_dice_counts
+      |> increment_turn
       |> cycle_players_until(looser)
   end
 
@@ -107,36 +109,42 @@ defmodule Perudox.Game.State do
   end
   def calzo(state, player) do
     state
+      |> increment_turn
       |> handle_calzo(player, length(Player.state(player).hand))
   end
 
   # Private functions.
 
+  @spec increment_turn(State.t) :: State.t
+  defp increment_turn(state) do
+    %{state | turn: state.turn + 1}
+  end
+
   @spec bet_allowed?(State.t, Bet.t) :: :ok | {:error, atom}
-  def bet_allowed?(%{history: []}, bet) do
+  defp bet_allowed?(%{history: []}, bet) do
     with :ok <- Bet.legal_count?(bet.count),
          do:    Bet.legal_value?(bet.value)
   end
-  def bet_allowed?(%{history: [lb | _]} = state, bet) do
+  defp bet_allowed?(%{history: [lb | _]} = state, bet) do
     with :ok <- Bet.legal_count?(bet.count),
          :ok <- Bet.legal_value?(bet.value),
          do:    Bet.stronger?(state.mode, bet, lb)
   end
 
   @spec bet_fulfilled?(State.t) :: boolean
-  def bet_fulfilled?(%{mode: mode, history: [lb | _]} = state) do
+  defp bet_fulfilled?(%{mode: mode, history: [lb | _]} = state) do
     count = occurences_of mode, occurences(state), lb.value
     lb.count <= count
   end
 
   @spec bet_exactly_fulfilled?(State.t) :: boolean
-  def bet_exactly_fulfilled?(%{mode: mode, history: [lb | _]} = state) do
+  defp bet_exactly_fulfilled?(%{mode: mode, history: [lb | _]} = state) do
     lb.count == occurences_of mode, occurences(state), lb.value
   end
 
   @spec cycle_players_until(State.t, Player.t) :: State.t
-  def cycle_players_until(%{players: [until | _]} = state, until), do: state
-  def cycle_players_until(state, until), do: cycle_players_until cycle_players(state), until
+  defp cycle_players_until(%{players: [until | _]} = state, until), do: state
+  defp cycle_players_until(state, until), do: cycle_players_until cycle_players(state), until
 
   @spec cycle_players(State.t) :: State.t
   defp cycle_players(%{players: players} = state) do

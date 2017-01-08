@@ -27,6 +27,9 @@ defmodule Perudox.Game do
   @spec phase(Game.t) :: State.phase
   def phase(game), do: state(game).phase
 
+  @spec turn(Game.t) :: State.turn
+  def turn(game), do: state(game).turn
+
   @spec mode(Game.t) :: State.mode
   def mode(game), do: state(game).mode
 
