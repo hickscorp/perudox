@@ -40,6 +40,8 @@ defmodule Perudox.GameTest do
     # Place a first bet.
     ret = Game.bet game, gina, %{count: 1, value: 2}
     assert ret == :ok
+    # We should still be in first turn.
+    assert Game.turn(game) == 1
     # Cannot bet unless it's the player's turn.
     ret = Game.bet game, gina, %{count: 1, value: 2}
     assert ret == {:error, :invalid_turn}
@@ -58,5 +60,7 @@ defmodule Perudox.GameTest do
     # Bet was correct, player who countered should have lost a dice.
     %{hand: hand} = Player.state tooth
     assert length(hand) == 4
+    # We should be in turn 2 now.
+    assert Game.turn(game) == 2
   end
 end

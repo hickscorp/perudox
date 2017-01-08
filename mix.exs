@@ -34,13 +34,14 @@ defmodule Perudox.Mixfile do
   defp deps do
     [
       {:ex_doc, "~> 0.14", only: :dev},
-      {:credo, "~> 0.4", only: :dev},
       {:mix_test_watch, "~> 0.2", only: :dev},
+      {:credo, "~> 0.4", only: :dev},
       {:dialyxir, "~> 0.4", only: :dev, runtime: false},
 
       {:faker, github: "igas/faker", override: true, only: ~w(dev test)a},
       {:blacksmith, "~> 0.1", only: ~w(dev test)a},
-      {:excoveralls, "~> 0.5", only: ~w(dev test)a}
+      {:excoveralls, "~> 0.5", only: ~w(dev test)a},
+      {:junit_formatter, "~> 1.2", only: ~w(dev, test)a}
     ]
   end
 

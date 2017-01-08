@@ -39,6 +39,7 @@ defmodule Perudox.Game.StateTest do
 
     test "prepares the state correctly", %{state: state, players: [p1, p2, p3, p4] = players} do
       %{phase: :bets,
+        turn: 1,
         first_player_turn: true,
         dice_count: dc,
         hand_counts: %{^p1 => @normal_hand, ^p2 => @normal_hand, ^p3 => @normal_hand, ^p4 => @normal_hand},
@@ -94,13 +95,14 @@ defmodule Perudox.Game.StateTest do
 
     test "can change value if in first player turn during palifico", %{state: %{players: [p1, p2, p3, p4]} = state} do
       bet = %Bet{count: 4, value: 2}
-      %{history: history} = %{state | mode: :palifico}
+      %{history: history, turn: turn} = %{state | mode: :palifico}
         |> State.bet(p1, %Bet{count: 1, value: 1})
         |> State.bet(p2, %Bet{count: 2, value: 1})
         |> State.bet(p3, %Bet{count: 3, value: 1})
         |> State.bet(p4, %Bet{count: 4, value: 1})
         |> State.bet(p1, bet)
       assert hd(history) == bet
+      assert turn == 1
     end
 
     test "errors if the bet is too weak", %{state: %{players: [p1, p2 | _]} = state} do
@@ -113,6 +115,7 @@ defmodule Perudox.Game.StateTest do
       %{players: [p1, p2, p3, p4]} = state
       bet = %Bet{count: 1, value: 2}
       %{
+        turn: 1,
         history: [^bet],
         players: [^p2, ^p3, ^p4, ^p1],
         first_player_turn: false,
@@ -148,8 +151,10 @@ defmodule Perudox.Game.StateTest do
 
     Enum.each @dudos, fn {count, p1_hand, p2_hand, msg} ->
       test "when the bet is " <> msg, %{state: %{players: [p1, p2 | _]} = state} do
-        state = state |> State.bet(p1, %Bet{count: unquote(count), value: 2})
-        state |> State.dudo(p2)
+        %{turn: turn} = state
+          |> State.bet(p1, %Bet{count: unquote(count), value: 2})
+          |> State.dudo(p2)
+        assert turn == 2
         %{hand: hand} = Player.state p1
         assert length(hand) == unquote(p1_hand)
         %{hand: hand} = Player.state p2
@@ -174,7 +179,9 @@ defmodule Perudox.Game.StateTest do
     end
 
     test "works even if it's not the player's turn", %{state: %{players: [_, p2 | _]} = state} do
-      %State{} = state |> State.calzo(p2)
+      %{turn: turn} = state
+        |> State.calzo(p2)
+      assert turn == 2
     end
 
     @calzos [
@@ -184,8 +191,10 @@ defmodule Perudox.Game.StateTest do
 
     Enum.each @calzos, fn {count, hand, msg} ->
       test "when the check is " <> msg, %{state: %{players: [p1, p2 | _]} = state} do
-        state = state |> State.bet(p1, %Bet{count: unquote(count), value: 2})
-        state |> State.calzo(p2)
+        %{turn: turn} = state
+          |> State.bet(p1, %Bet{count: unquote(count), value: 2})
+          |> State.calzo(p2)
+        assert turn == 2
         %{hand: hand} = Player.state p2
         assert length(hand) == unquote(hand)
       end

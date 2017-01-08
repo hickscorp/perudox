@@ -1,13 +1,35 @@
+machine:
+  environment:
+    PATH: "$HOME/.asdf/bin:$HOME/.asdf/shims:$PATH"
+    MIX_ENV: test
+
 dependencies:
-  pre:
-    - script/ci/prepare.sh
   cache_directories:
-    - ~/dependencies
-    - ~/.mix
-    - _build
+    - ~/.asdf
     - deps
+    - _build
+  pre:
+    - if ! asdf | grep version; then git clone https://github.com/asdf-vm/asdf.git ~/.asdf; fi
+    - asdf plugin-add erlang https://github.com/asdf-vm/asdf-erlang.git || true
+    - asdf plugin-add elixir https://github.com/asdf-vm/asdf-elixir.git || true
+    - asdf install
+    - mix local.hex --force
+    - mix local.rebar --force
+  override:
+    - mix deps.get
+    - mix deps.compile
 
 test:
   override:
-    - script/ci/tests.sh
-    - script/ci/coveralls.sh
+    - mix coveralls.circle
+    - mkdir -p $CIRCLE_TEST_REPORTS/exunit
+    - cp _build/test/lib/perudox/results.xml $CIRCLE_TEST_REPORTS/exunit
+
+deployment:
+  prod:
+    branch: master
+    commands:
+      - mix edeliver build release
+      - mix edeliver deploy release to production
+      - mix edeliver restart production
+      - mix edeliver migrate production
